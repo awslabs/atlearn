@@ -1,0 +1,16 @@
+Metadata-Version: 2.1
+Name: ATLearn
+Version: 0.0.1
+Summary: ATLearn: An adaptive transfer learning toolkit
+Home-page: UNKNOWN
+Author: Jun Wu
+Author-email: <junwu3@illinois.edu>
+License: UNKNOWN
+Keywords: python,first package
+Platform: UNKNOWN
+Classifier: Intended Audience :: Education
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+
+ATLearn is a Transfer Learning toolkit that supports easy model building on top of the pre-trained models
+
