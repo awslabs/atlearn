@@ -1,6 +1,7 @@
 # ATLearn (Adaptive Transfer Learning) Toolkit
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
+## Introduction
 ATLearn is a Transfer Learning toolkit that supports easy model building on top of the pre-trained models. 
 It provides a set of APIs that enable users to load pre-trained models, build and train their customized 
 transfer learning models, and export the models for inference and deployment.

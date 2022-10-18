@@ -7,6 +7,11 @@
 #/dataSources/
 #/dataSources.local.xml
 
+# tmp folders
+build
+checkpoint
+save
+
 .DS_Store
 .idea
 .clang
