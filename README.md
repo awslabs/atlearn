@@ -24,7 +24,7 @@ detection.
 
 ## Why ATLearn?
 <p align="center">
-  <img src="./figs/example.png" width="500" title="Performance">
+  <img src="./figs/example.png" width="300" title="Performance">
 </p>
 
 * Strong performance: It achieves high performance on image classification and object detection tasks.
