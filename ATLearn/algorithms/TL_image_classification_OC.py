@@ -19,7 +19,7 @@ from tqdm import tqdm
 
 
 class TL_image_classification_OC(BaseTL):
-    def __init__(self, data, user_network=None, network='resnet50', retrain=False, freeze=True, gpu_id=-1,
+    def __init__(self, data, user_network=None, network='resnet50', retrain=False, freeze=True, gpu_id=-1, options=None,
                  method="PseudoPU", beta=0.6, dist="euclidean", epochs=20, lr=1e-3, batch_size=32, save_every_epoch=5):
         '''
         Deep one-class transfer learning for image classification with only positive samples
@@ -37,7 +37,7 @@ class TL_image_classification_OC(BaseTL):
         :param batch_size: batch size
         :param save_every_epoch: save checkpoint at some steps
         '''
-        super(TL_image_classification_OC, self).__init__(data, user_network, network, retrain, freeze, gpu_id)
+        super(TL_image_classification_OC, self).__init__(data, user_network, network, retrain, freeze, gpu_id, options)
         self.base_network_name = network
         self.method = method
         self.beta = beta

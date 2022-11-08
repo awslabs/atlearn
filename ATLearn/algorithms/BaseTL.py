@@ -28,7 +28,8 @@ from datetime import datetime
 
 
 class BaseTL(nn.Module):
-    def __init__(self, data, user_network=None, network='resnet50', retrain=False, freeze=True, gpu_id=-1):
+    def __init__(self, data, user_network=None, network='resnet50', retrain=False, freeze=True, gpu_id=-1,
+                 options=None):
         super(BaseTL, self).__init__()
         if gpu_id >= 0 and torch.cuda.is_available():
             self.device = torch.device("cuda:{}".format(gpu_id))
@@ -51,8 +52,8 @@ class BaseTL(nn.Module):
             self.base_network = torch.nn.Sequential(*list(self.base_network.children())[:-1])
             self.base_network.append(torch.nn.Flatten())
         self.base_network = self.base_network.to(device=self.device)
-        d = self.base_network(torch.rand(1, 3, 224, 224).to(device=self.device))
-        self.fts_dim = d.shape[1]
+        test_input = torch.rand(1, 3, 224, 224).to(device=self.device)
+        self.fts_dim = self.base_network(test_input).shape[1]
         for param in self.base_network.parameters():
             param.requires_grad = freeze
         if retrain:
@@ -63,6 +64,11 @@ class BaseTL(nn.Module):
         self.optimizer = None
         self.base_names, self.classifier_names = [], []
         self.save_traced_network = None
+
+        if options and options.get("embedding_export", False):
+            self.base_network.train(False)
+            traced_base_network = torch.jit.trace(self.base_network, test_input)
+            traced_base_network.save(options["save_path"] + "/" + network + "_embedding.pt")
 
     def forward(self, inputs):
         inputs = self.cnn(inputs)
@@ -97,7 +103,7 @@ class BaseTL(nn.Module):
         inputs_mix = lam * inputs + (1 - lam) * inputs[index]
         return inputs_mix, lam, labels, labels[index]
 
-    def export(self, save_name="model", save_path="../"):
+    def export(self, save_name="model", save_path="../save/"):
         date = datetime.now().strftime("%Y_%m_%d")
         model = torch.nn.Sequential()
         model.append(self.base_network)

@@ -22,7 +22,7 @@ from tqdm import tqdm
 
 
 class DTL_image_classification(BaseTL):
-    def __init__(self, data, user_network=None, network='resnet50', retrain=False, freeze=True, gpu_id=-1,
+    def __init__(self, data, user_network=None, network='resnet50', retrain=False, freeze=True, gpu_id=-1, options=None,
                  labeled_data=True, epochs=10, lr=1e-3, batch_size=32, save_every_epoch=500):
         '''
         A dynamic transfer learning for image classification
@@ -40,7 +40,7 @@ class DTL_image_classification(BaseTL):
         :param batch_size: batch size
         :param save_every_epoch: save checkpoint at some steps
         '''
-        super(DTL_image_classification, self).__init__(data, user_network, network, retrain, freeze, gpu_id)
+        super(DTL_image_classification, self).__init__(data, user_network, network, retrain, freeze, gpu_id, options)
         self.base_network_name = network
         self.labeled_data = labeled_data
         self.epochs = epochs

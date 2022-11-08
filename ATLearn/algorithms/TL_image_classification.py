@@ -19,12 +19,21 @@ from tqdm import tqdm
 
 
 class TL_image_classification(BaseTL):
-    def __init__(self, data, user_network=None, network='resnet50', retrain=False, freeze=True, gpu_id=-1, aug=False, rho=0.1,
-                 epochs=10, lr=1e-3, batch_size=32, save_every_epoch=5):
+    def __init__(self, data, user_network=None, network='resnet50', retrain=False, freeze=True, gpu_id=-1,
+                 options=None, aug=False, rho=0.1, epochs=10, lr=1e-3, batch_size=32, save_every_epoch=5):
         '''
         A standard transfer learning for image classification
         :param data: path to load the training examples.
-            A folder includes multiple sub-folders where each sub-folder contains the training examples in one class
+            A folder includes multiple sub-folders where each sub-folder contains the training examples in one class:
+            path/class_a/1.png
+            path/class_a/2.png
+            ...
+            path/class_b/1.png
+            path/class_b/2.png
+            ...
+            path/class_c/1.png
+            path/class_c/2.png
+            ...
         :param user_network: customers' own pre-trained model
         :param network: a large pre-trained network
         :param retrain: whether to retrain the model. If so, model architecture of pre-trained model will not be changed.
@@ -37,7 +46,7 @@ class TL_image_classification(BaseTL):
         :param batch_size: batch size
         :param save_every_epoch: save checkpoint at some steps
         '''
-        super(TL_image_classification, self).__init__(data, user_network, network, retrain, freeze, gpu_id)
+        super(TL_image_classification, self).__init__(data, user_network, network, retrain, freeze, gpu_id, options)
         self.base_network_name = network
         self.aug = aug
         self.rho = rho

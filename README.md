@@ -53,7 +53,7 @@ model = ATLearn.get_model(task.IMAGE_CLASSIFICATION,
                           network='resnet50',  # pre-trained model from torch
                           user_network=None)   # users' own model
 model.train_model()
-model.export(save_name="model", save_path="../")
+model.export(save_name="model", save_path="../save/")
 ```
 Here is a simple demo to show freshness analysis.
 ```
@@ -66,7 +66,7 @@ model = ATLearn.get_model(task.IMAGE_CLASSIFICATION,
                           network='resnet50',  # pre-trained model from torch
                           user_network=None)   # users' own model
 model.train_model()
-model.export(save_name="model", save_path="../")
+model.export(save_name="model", save_path="../save/")
 ```
 Here is a simple demo to show real-time object detection on camera.
 ```

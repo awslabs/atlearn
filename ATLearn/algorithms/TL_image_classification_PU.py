@@ -20,8 +20,9 @@ from ATLearn.utils.data_loader import read_data_from_folder_pu
 
 
 class TL_image_classification_PU(BaseTL):
-    def __init__(self, data, user_network=None, network='resnet50', retrain=False, freeze=True, gpu_id=-1, beta=0.5, rho=1,
-                 warmup_epochs=50, epochs=100, lr=1e-3, batch_size=32, save_every_epoch=10):
+    def __init__(self, data, user_network=None, network='resnet50', retrain=False, freeze=True, gpu_id=-1,
+                 options=None, beta=0.5, rho=1, warmup_epochs=50, epochs=100, lr=1e-3, batch_size=32,
+                 save_every_epoch=10):
         '''
         A PU-based transfer learning for image classification with positive samples and unlabeled samples
         :param data: path to load the training examples (default: the first folder contains the positive examples)
@@ -38,7 +39,7 @@ class TL_image_classification_PU(BaseTL):
         :param batch_size: batch size
         :param save_every_epoch: save checkpoint at some steps
         '''
-        super(TL_image_classification_PU, self).__init__(data, user_network, network, retrain, freeze, gpu_id)
+        super(TL_image_classification_PU, self).__init__(data, user_network, network, retrain, freeze, gpu_id, options)
         self.base_network_name = network
         self.beta = beta
         self.rho = rho

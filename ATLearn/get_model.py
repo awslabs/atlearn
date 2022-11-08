@@ -24,7 +24,8 @@ def get_model(mode, algorithm, data,
               network=None,
               retrain=False,
               freeze=True,
-              gpu_id=-1):
+              gpu_id=-1,
+              options=None):
     model = None
     if mode == "image_classification":
         assert algorithm in ['TL_image_classification', 'TL_image_classification_PU', 'TL_image_classification_OC',
@@ -37,7 +38,8 @@ def get_model(mode, algorithm, data,
                              network=network,
                              retrain=retrain,
                              freeze=freeze,
-                             gpu_id=gpu_id)
+                             gpu_id=gpu_id,
+                             options=options)
     elif mode == "object_detection":
         assert algorithm in ['TL_object_detection']
         if network is None:
@@ -48,7 +50,8 @@ def get_model(mode, algorithm, data,
                              user_network=user_network,
                              network=network,
                              freeze=freeze,
-                             gpu_id=gpu_id)
+                             gpu_id=gpu_id,
+                             options=options)
     else:
         print("This task is not implemented yet.")
 

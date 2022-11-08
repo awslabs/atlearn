@@ -22,8 +22,8 @@ from tqdm import tqdm
 
 class TL_regression(BaseTL):
     def __init__(self, data, user_network=None, network='resnet50', freeze=True, gpu_id=-1,
-                 epochs=10, lr=1e-3, batch_size=32, save_every_epoch=5):
-        super(TL_regression, self).__init__(data, user_network, network, freeze, gpu_id)
+                 options=None, epochs=10, lr=1e-3, batch_size=32, save_every_epoch=5):
+        super(TL_regression, self).__init__(data, user_network, network, freeze, gpu_id, options)
         '''
         A standard transfer learning for image regression
         :param path: path to load the training examples  
