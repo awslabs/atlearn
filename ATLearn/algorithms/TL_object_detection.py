@@ -119,6 +119,9 @@ class TL_object_detection(object):
         if self.val_data:
             self.val_loader, _ = create_dataloader(self.val_data, imgsz, batch_size, gs)
 
+        if not options:
+            raise Warning("Option not implemented yet.")
+
     def train_model(self):
         t_start = time.time()
         for epoch in tqdm(range(1, self.epochs+1)):
