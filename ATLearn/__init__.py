@@ -13,6 +13,7 @@
 
 from .task import task_manager, algorithm_manager
 from .get_model import get_model
+from .get_embedding import get_embedding
 
 task = task_manager()
 algorithm = algorithm_manager()
