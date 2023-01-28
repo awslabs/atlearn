@@ -46,7 +46,7 @@ class YoloModel(torch.nn.Module):
 
 class TL_object_detection(object):
     def __init__(self, data=None, val_data=None, user_network=None, network='yolov5s', freeze=True, gpu_id=-1,
-                 options=None, num_classes=2, epochs=20, batch_size=32, save_every_epoch=500):
+                 options=None, num_classes=2, epochs=100, batch_size=32, save_every_epoch=500):
         '''
         A standard object detection for object detection based on YOLOv5 or YOLOv3
         :param data: path to load the training examples, including both training images and annotations in one folder
