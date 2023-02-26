@@ -119,9 +119,6 @@ class TL_object_detection(object):
         if self.val_data:
             self.val_loader, _ = create_dataloader(self.val_data, imgsz, batch_size, gs)
 
-        if not options:
-            raise Warning("Option not implemented yet.")
-
     def train_model(self):
         t_start = time.time()
         for epoch in tqdm(range(1, self.epochs+1)):
@@ -152,6 +149,10 @@ class TL_object_detection(object):
             if epoch % self.save_every_epoch == 0:
                 self.save_checkpoint(epoch, training_loss)
         print("Model training is done with {:.4f} seconds!".format(time.time() - t_start))
+
+        # jit save mask.pt
+        self.model.eval()
+        torch.save(self.model, "./mask.pt")
 
     def validation(self, iou_thres=0.2, conf_thres=0.001, save_txt=True):
         self.model.eval()
@@ -203,7 +204,7 @@ class TL_object_detection(object):
             print(pf % (names[c], seen, nt[c], p[i], r[i], ap50[i], ap[i]))
 
     def predict(self, input_data, class_names, conf_thres=0.7, iou_thres=0.45, show_img=True, save_txt=True):
-        self.model = torch.jit.load("../mask.pt").to(self.device)
+        self.model = torch.load("./mask.pt")
         self.model.names = class_names
         self.model.eval()
         is_file = Path(input_data).suffix[1:] in (IMG_FORMATS + VID_FORMATS) or input_data == "camera"
