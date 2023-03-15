@@ -17,8 +17,10 @@ import torch.jit
 
 ssl._create_default_https_context = ssl._create_unverified_context
 import random
+import onnxruntime as ort
 from tqdm import tqdm
 from datetime import datetime
+from typing import List
 from ATLearn.algorithms.helper import *
 from ATLearn.utils.yolo_data_loader import create_dataloader
 IMG_FORMATS = 'bmp', 'dng', 'jpeg', 'jpg', 'mpo', 'png', 'tif', 'tiff', 'webp'  # include image suffixes
@@ -119,7 +121,7 @@ class TL_object_detection(object):
         if self.val_data:
             self.val_loader, _ = create_dataloader(self.val_data, imgsz, batch_size, gs)
 
-    def train_model(self):
+    def train_model(self, model_file):
         t_start = time.time()
         for epoch in tqdm(range(1, self.epochs+1)):
             training_loss = 0.
@@ -152,7 +154,7 @@ class TL_object_detection(object):
 
         # jit save mask.pt
         self.model.eval()
-        torch.save(self.model, "./mask.pt")
+        torch.save(self.model, model_file)
 
     def validation(self, iou_thres=0.2, conf_thres=0.001, save_txt=True):
         self.model.eval()
@@ -203,17 +205,28 @@ class TL_object_detection(object):
         for i, c in enumerate(ap_class):
             print(pf % (names[c], seen, nt[c], p[i], r[i], ap50[i], ap[i]))
 
-    def predict(self, input_data, class_names, conf_thres=0.7, iou_thres=0.45, show_img=True, save_txt=True):
-        self.model = torch.load("./mask.pt")
-        self.model.names = class_names
-        self.model.eval()
+    def predict(self,
+                input_data: str,
+                class_names: List[str],
+                conf_thres=0.7,
+                iou_thres=0.45,
+                show_img=True,
+                save_txt=True,
+                model_file='./mask.pt'):
         is_file = Path(input_data).suffix[1:] in (IMG_FORMATS + VID_FORMATS) or input_data == "camera"
         assert is_file, f"Only image and video are supported now!"
+        model_file_suffix = model_file.split('.')[-1].lower()
         if input_data.split('.')[-1].lower() in IMG_FORMATS:
             print("Image")
             img0 = cv2.imread(input_data)  # BGR
             assert img0 is not None, f'Image Not Found {input_data}'
-            img0 = self.show_results(img0, input_data, conf_thres, iou_thres, save_txt)
+            if 'pt' == model_file_suffix:
+                img0 = self.show_results(img0, model_file, class_names, input_data, conf_thres, iou_thres, save_txt)
+            elif 'onnx' == model_file_suffix:
+                img0 = self.show_results_onnx(img0, model_file, class_names, input_data, conf_thres, iou_thres,
+                                              save_txt)
+            else:
+                raise("model file suffix is not recoganized.")
             if show_img:
                 cv2.imshow(str(Path(input_data)), img0)
                 cv2.waitKey(0)
@@ -226,15 +239,24 @@ class TL_object_detection(object):
             ret_val, img0 = cap.read()
             while ret_val:
                 _, img0 = cap.read()
-                img0 = self.show_results(img0, input_data, conf_thres, iou_thres, save_txt)
+                if 'pt' == model_file_suffix:
+                    img0 = self.show_results(img0, model_file, class_names, input_data, conf_thres, iou_thres, save_txt)
+                elif 'onnx' == model_file_suffix:
+                    img0 = self.show_results_onnx(img0, model_file, class_names, input_data, conf_thres, iou_thres,
+                                                  save_txt)
+                else:
+                    raise ("model file suffix is not recoganized.")
                 if show_img:
                     cv2.imshow(str(Path(input_data)), img0)
                     cv2.waitKey(1)
                 ret_val, img0 = cap.read()
         else:
-            print("Unknown input format! Only image and video are supported now!")
+            raise("Unknown input format! Only image and video are supported now!")
 
-    def show_results(self, img0, input_data, conf_thres, iou_thres, save_txt):
+    def show_results(self, img0, model_file, class_names, input_data, conf_thres, iou_thres, save_txt):
+        self.model = torch.load(model_file)
+        self.model.eval()
+
         img = letterbox(img0, 640, stride=32, auto=False, scaleFill=True)[0]
         img = img.transpose((2, 0, 1))[::-1]  # HWC to CHW, BGR to RGB
         img = np.ascontiguousarray(img)
@@ -247,16 +269,68 @@ class TL_object_detection(object):
                                    agnostic=False, max_det=1000)[0]
 
         colors = Colors()
-        annotator = Annotator(img0, line_width=3, example=str(self.model.names))
+        annotator = Annotator(img0, line_width=3, example=str(class_names))
         pred[:, :4] = scale_coords(img.shape[2:], pred[:, :4], img0.shape).round()
         for c in pred[:, -1].unique():
             n = (pred[:, -1] == c).sum()  # detections per class
-            s = f"{n} {self.model.names[int(c)]}{'s' * (n > 1)}, "  # add to string
+            s = f"{n} {class_names[int(c)]}{'s' * (n > 1)}, "  # add to string
             print(s)
         lines = []
         for *xyxy, conf, cls in reversed(pred):
             c = int(cls)  # integer class
-            label = f'{self.model.names[c]} {conf:.2f}'
+            label = f'{class_names[c]} {conf:.2f}'
+            annotator.box_label(xyxy, label, color=colors(c, True))
+
+            gn = torch.tensor(img0.shape)[[1, 0, 1, 0]]
+            xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
+            line = (cls, *xywh, conf)
+            lines.append(line)
+
+        if save_txt:
+            save_path = input_data.rsplit('.', 1)[0] + '.txt'
+            with open(save_path, 'a') as f:
+                for line in lines:
+                    f.write(('%g ' * len(line)).rstrip() % line + '\n')
+        img0 = annotator.result()
+
+        return img0
+
+    def show_results_onnx(self, img0, model_file, class_names, input_data, conf_thres, iou_thres, save_txt):
+        # Load the ONNX model
+        # model_file = "./onnx_models_100/mask.onnx"
+        session = ort.InferenceSession(model_file)
+
+        # Define input and output names
+        input_name = session.get_inputs()[0].name
+        output_names = [session.get_outputs()[i].name for i in range(len(session.get_outputs()))]
+
+        img = letterbox(img0, 640, stride=32, auto=False, scaleFill=True)[0]
+        img = img.transpose((2, 0, 1))[::-1]  # HWC to CHW, BGR to RGB
+        img = np.ascontiguousarray(img)
+        img = np.expand_dims(img, axis=0)
+        img = img.astype(np.float32) / 255.0
+
+        # Run inference
+        input_data_onnx = {input_name: img}
+        pred = session.run(output_names, input_data_onnx)[0]
+        pred = torch.from_numpy(pred).to(self.device)
+
+        # Post-process
+        pred = non_max_suppression(pred, conf_thres=conf_thres, iou_thres=iou_thres, classes=None,
+                                   agnostic=False, max_det=1000)[0]
+
+        # Visualization
+        colors = Colors()
+        annotator = Annotator(img0, line_width=3, example=str(class_names))
+        pred[:, :4] = scale_coords(img.shape[2:], pred[:, :4], img0.shape).round()
+        for c in pred[:, -1].unique():
+            n = (pred[:, -1] == c).sum()  # detections per class
+            s = f"{n} {class_names[int(c)]}{'s' * (n > 1)}, "  # add to string
+            print(s)
+        lines = []
+        for *xyxy, conf, cls in reversed(pred):
+            c = int(cls)  # integer class
+            label = f'{class_names[c]} {conf:.2f}'
             annotator.box_label(xyxy, label, color=colors(c, True))
 
             gn = torch.tensor(img0.shape)[[1, 0, 1, 0]]
