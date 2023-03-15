@@ -9,7 +9,7 @@ install_requires = [
     'Pillow==9.3.0',
     'matplotlib==3.5.2',
     'numpy==1.22.3',
-    'opencv-python==4.5.5.64',
+    'opencv-python==4.7.0.72',
     'pandas==1.4.2',
     'scikit-learn==1.1.1',
     'tqdm==4.64.0',
