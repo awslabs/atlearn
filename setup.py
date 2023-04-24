@@ -10,7 +10,7 @@ install_requires = [
     'matplotlib==3.7.1',
     'numpy==1.24.2',
     'opencv-python==4.7.0.72',
-    'pandas==1.5.3',
+    'pandas==2.0.1',
     'scikit-learn==1.2.2',
     'tqdm==4.65.0',
     'torch==2.0.0',
