@@ -8,7 +8,7 @@ LONG_DESCRIPTION = 'ATLearn is a Transfer Learning toolkit that supports easy mo
 install_requires = [
     'Pillow==9.4.0',
     'matplotlib==3.7.1',
-    'numpy==1.24.2',
+    'numpy==1.24.3',
     'opencv-python==4.7.0.72',
     'pandas==1.5.3',
     'scikit-learn==1.2.2',
