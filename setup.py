@@ -13,7 +13,7 @@ install_requires = [
     'pandas==1.5.3',
     'scikit-learn==1.2.2',
     'tqdm==4.65.0',
-    'torch==2.0.0',
+    'torch==2.0.1',
     'torchvision==0.15.1',
 ]
 
