@@ -12,7 +12,7 @@ install_requires = [
     'opencv-python==4.7.0.72',
     'pandas==2.1.1',
     'scikit-learn==1.3.1',
-    'tqdm==4.65.0',
+    'tqdm==4.66.1',
     'torchvision==0.15.1',
     'tqdm==4.66.1',
     'torch==2.0.1',
