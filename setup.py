@@ -16,7 +16,7 @@ install_requires = [
     'torchvision==0.15.1',
     'tqdm==4.66.1',
     'torch==2.0.1',
-    'torchvision==0.15.2',
+    'torchvision==0.16.2',
 ]
 
 # Setting up
